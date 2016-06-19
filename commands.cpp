@@ -16,13 +16,14 @@ CCommands::~CCommands()
 
 void CCommands::show()
 {
-
-
     auto data = std::move(m_serverMng.getTableData());
 
     for (auto& outer : data)
     {
-        ui->comboBox->addItem(outer.second["Name"], QVariant(outer.first));
+        if (ui->comboBox->findText(outer.second["Name"]) == -1)
+        {
+            ui->comboBox->addItem(outer.second["Name"], QVariant(outer.first));
+        }
     }
 
     QDialog::show();
@@ -34,3 +35,15 @@ void CCommands::on_comboBox_activated(int index)
 }
 
 
+
+void CCommands::on_pushButton_clicked()
+{
+    auto ind(ui->comboBox->currentData().toUInt());
+
+    QByteArray rawJason;
+
+    CServerManager::TStringMap resp(m_serverMng.sendMsg(ind, "getbalance", "", &rawJason));
+
+    qDebug() << "raw Response: [ " << rawJason << " ]";
+    //TODO: pare resp here
+}

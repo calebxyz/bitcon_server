@@ -17,7 +17,11 @@ class CServerManager : public QObject
     Q_OBJECT
 public:
 
-    using TServTable = std::map<int ,std::map<QString, QString> >;
+    using TStringPair = std::pair<QString, QString>;
+
+    using TStringMap = std::map<QString, QString>;
+
+    using TServTable = std::map<int , TStringMap>;
 
     static CServerManager& getReference();
 
@@ -34,6 +38,8 @@ public:
     void deleteAll();
 
     TServTable getTableData();
+
+    TStringMap sendMsg(int idx, QString cmd, QString args, QByteArray* rawJason = nullptr);
 
     //delete copy ctor and operator=
     CServerManager(CServerManager&) = delete;
@@ -58,7 +64,9 @@ private:
         SCliWrap(unsigned int port, unsigned int id);
         bool run();
         bool remove();
-        QJsonRpcMessage sendMsg(QString cmd, QString args);
+        TStringMap sendMsg(QString cmd, QString args, QByteArray* rawJason = nullptr);
+
+
         QString toString();
 
         inline QString getName()
@@ -87,6 +95,7 @@ private:
         std::unique_ptr<CJasonHttpClient> m_cli;
 
         void runDockerCmd(const QString& args);
+        TStringMap parse(QJsonRpcMessage msg);
     };
 
     template <typename TFunc>

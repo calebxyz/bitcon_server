@@ -2,6 +2,7 @@
 #include <QProcess>
 #include <algorithm>
 #include <QDebug>
+#include <QJsonDocument>
 
 #define CLI_WRAPPER CServerManager::SCliWrap;
 
@@ -36,7 +37,9 @@ CServerManager& CServerManager::getReference()
 
 void CServerManager::registerClient()
 {
-    m_cliMap.emplace(TCliPair(s_id, std::move(SCliWrap(s_id++, s_port++))));
+    m_cliMap.emplace(TCliPair(s_id, std::move(SCliWrap(s_id, s_port))));
+    s_id++;
+    s_port++;
 }
 
 void CServerManager::deleteClient(uint id)
@@ -101,6 +104,19 @@ CServerManager::TServTable CServerManager::getTableData()
     return rv;
 }
 
+CServerManager::TStringMap CServerManager::sendMsg(int idx, QString cmd, QString args, QByteArray* rawJason)
+{
+    TStringMap rv;
+    auto cli(m_cliMap.find(idx));
+
+    if (cli != m_cliMap.end())
+    {
+        cli->second.sendMsg(std::move(cmd), std::move(args), rawJason);
+    }
+
+    return rv;
+}
+
 
 //wrapper implementation
 CServerManager::SCliWrap::SCliWrap(unsigned int id, unsigned int port)
@@ -152,15 +168,22 @@ bool CServerManager::SCliWrap::remove()
     return rv;
 }
 
-QJsonRpcMessage CServerManager::SCliWrap::sendMsg(QString cmd, QString args)
+CServerManager::TStringMap CServerManager::SCliWrap::sendMsg(QString cmd, QString args, QByteArray* rawJason)
 {
-    QJsonRpcMessage rv;
+    TStringMap rv;
 
     QStringList arguments = args.split(" ");
 
     QJsonRpcMessage sendMsg = std::move(m_cli->prepareMessage(std::move(cmd), std::move(arguments)));
 
-    rv = std::move(m_cli->sendAndWaitForResp(std::move(sendMsg)));
+    QJsonRpcMessage rep = std::move(m_cli->sendAndWaitForResp(std::move(sendMsg)));
+
+    rv = std::move(parse(rep));
+
+    if (rawJason)
+    {
+        *rawJason = std::move(rep.toJson());
+    }
 
     return rv;
 }
@@ -181,6 +204,52 @@ void CServerManager::SCliWrap::runDockerCmd(const QString& args)
     }
 
     qDebug() << "run finished with: " << proc.readAllStandardOutput() << proc.readAllStandardError();
+}
+
+CServerManager::TStringMap CServerManager::SCliWrap::parse(QJsonRpcMessage msg)
+{
+    TStringMap rv;
+
+    if (msg.type() == QJsonRpcMessage::Error)
+    {
+        rv.emplace(TStringPair("Error", msg.errorData().toString()));
+    }
+    else
+    {
+        qDebug() << "resp: [ " << msg.toJson() << " ]";
+        QJsonDocument jsoDoc(QJsonDocument::fromJson(msg.toJson()));
+        auto vari(jsoDoc.toVariant());
+
+        if (vari.canConvert<QVariantMap>())
+        {
+            QVariantMap map(vari.value<QVariantMap>());
+
+            //for now just convert it to a string
+            QString str(vari.toString());
+            rv.emplace(TStringPair("Response", str));
+
+            /*for (QVariantMap::Iterator var : map)
+            {
+                //TODO : HOW DO I ITERATE ON THIS MAP ?????
+                rv.emplace(TStringPair(var.first, var.second.toString()));
+            }*/
+        }
+        else if (vari.canConvert<QVariantList>())
+        {
+             QSequentialIterable iterable = vari.value<QSequentialIterable>();
+
+             QString respons;
+
+             for(auto& var : iterable)
+             {
+                  respons += var.toString();
+             }
+
+             rv.emplace(TStringPair("Response", respons));
+        }
+    }
+
+    return rv;
 }
 
 QString CServerManager::SCliWrap::toString()
