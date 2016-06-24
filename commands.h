@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "servermanager.h"
+#include "showresp.h"
 
 namespace Ui {
 class CCommands;
@@ -25,11 +26,14 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_pushButton_2_clicked();
+
 private:
     Ui::CCommands *ui;
 
     CServerManager& m_serverMng = CServerManager::getReference();
     int m_index = -1;
+    CShowResp m_respShower;
 };
 
 #endif // COMMANDS_H

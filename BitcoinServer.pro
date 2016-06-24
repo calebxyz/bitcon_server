@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     startservers.cpp \
     stopservers.cpp \
     show.cpp \
-    commands.cpp
+    commands.cpp \
+    showresp.cpp
         bitcoinserver.cpp
 
 HEADERS  += bitcoinserver.h\
@@ -34,14 +35,16 @@ HEADERS  += bitcoinserver.h\
     startservers.h \
     stopservers.h \
     show.h \
-    commands.h
+    commands.h \
+    showresp.h
 
 FORMS    += bitcoinserver.ui \
     settingswin.ui \
     startservers.ui \
     stopservers.ui \
     show.ui \
-    commands.ui
+    commands.ui \
+    showresp.ui
 
 LIBS += -L $${HTTP_LIB} -ljasonhttpclient
 

@@ -19,6 +19,10 @@ constexpr TDockCmdLine RUN_DEMON{"bitcoind -regtest -server -rpcuser=test -rpcpa
 constexpr TDockCmdLine DOCKER_BUILD{"build -t %1 %2"};
 constexpr TDockCmdLine DOCKER{"docker"};
 
+const char* CServerManager::ACTIVE = "Active";
+const char* CServerManager::DEACTIVE = "Deactive";
+const char* CServerManager::RESP_SEPERATOR = "?!?!";
+
 //static definitions
 unsigned int CServerManager::s_id = 0;
 unsigned int CServerManager::s_port = 8888;
@@ -49,7 +53,7 @@ void CServerManager::deleteClient(uint id)
     if (iter != m_cliMap.end())
     {
         (iter->second).remove();
-        m_cliMap.erase(iter);
+        //m_cliMap.erase(iter);
     }
 }
 
@@ -111,7 +115,7 @@ CServerManager::TStringMap CServerManager::sendMsg(int idx, QString cmd, QString
 
     if (cli != m_cliMap.end())
     {
-        cli->second.sendMsg(std::move(cmd), std::move(args), rawJason);
+        rv = cli->second.sendMsg(std::move(cmd), std::move(args), rawJason);
     }
 
     return rv;
@@ -216,37 +220,27 @@ CServerManager::TStringMap CServerManager::SCliWrap::parse(QJsonRpcMessage msg)
     }
     else
     {
-        qDebug() << "resp: [ " << msg.toJson() << " ]";
-        QJsonDocument jsoDoc(QJsonDocument::fromJson(msg.toJson()));
-        auto vari(jsoDoc.toVariant());
+        //QJsonDocument jsoDoc(QJsonDocument::fromJson(msg.result().toVariant()));
+        auto var(msg.result().toVariant());
 
-        if (vari.canConvert<QVariantMap>())
-        {
-            QVariantMap map(vari.value<QVariantMap>());
+         if (var.canConvert<QVariantList>())
+         {
+              QSequentialIterable iterable = var.value<QSequentialIterable>();
 
-            //for now just convert it to a string
-            QString str(vari.toString());
-            rv.emplace(TStringPair("Response", str));
+              QString respons;
 
-            /*for (QVariantMap::Iterator var : map)
-            {
-                //TODO : HOW DO I ITERATE ON THIS MAP ?????
-                rv.emplace(TStringPair(var.first, var.second.toString()));
-            }*/
-        }
-        else if (vari.canConvert<QVariantList>())
-        {
-             QSequentialIterable iterable = vari.value<QSequentialIterable>();
+              for(auto& var : iterable)
+              {
+                   respons += var.toString() + RESP_SEPERATOR;
+              }
 
-             QString respons;
+              rv.emplace(TStringPair("Response", respons));
+         }
+         else
+         {
+             rv.emplace(TStringPair("Response", var.toString()));
+         }
 
-             for(auto& var : iterable)
-             {
-                  respons += var.toString();
-             }
-
-             rv.emplace(TStringPair("Response", respons));
-        }
     }
 
     return rv;
@@ -256,7 +250,7 @@ QString CServerManager::SCliWrap::toString()
 {
     QString rv;
 
-    rv = "Name: " + getName() + " End Point: " + getEndPoint() + "Status: " + (m_isActive ? "Active" : "Deactivated");
+    rv = "Name: " + getName() + " End Point: " + getEndPoint() + "Status: " + isActive();
 
     return rv;
 }

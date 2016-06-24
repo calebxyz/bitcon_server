@@ -15,6 +15,8 @@ public:
     explicit CStopServers(QWidget *parent = 0);
     ~CStopServers();
 
+    virtual void show();
+
 private slots:
     void on_pushButton_clicked();
 

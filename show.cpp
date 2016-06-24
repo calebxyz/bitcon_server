@@ -16,7 +16,7 @@ CShow::~CShow()
 
 void CShow::on_pushButton_clicked()
 {
-
+    hide();
 }
 
 void CShow::on_pushButton_2_clicked()

@@ -17,6 +17,12 @@ class CServerManager : public QObject
     Q_OBJECT
 public:
 
+
+    //static constans
+    static const char* ACTIVE;
+    static const char* DEACTIVE;
+    static const char* RESP_SEPERATOR;
+
     using TStringPair = std::pair<QString, QString>;
 
     using TStringMap = std::map<QString, QString>;
@@ -81,7 +87,7 @@ private:
 
         inline QString isActive()
         {
-            return m_isActive ? "Active" : "Deactive";
+            return m_isActive ? ACTIVE : DEACTIVE;
         }
 
 
