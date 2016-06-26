@@ -4,6 +4,8 @@
 #include <QDialog>
 #include "servermanager.h"
 #include "showresp.h"
+#include <utility>
+#include <iostream>
 
 namespace Ui {
 class CCommands;
@@ -28,7 +30,31 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    void on_pushButton_3_clicked();
+
+    void on_pushButton_4_clicked();
+
+    void on_pushButton_5_clicked();
+
 private:
+
+    bool runCommand(const uint32_t ind, const QString& cmd, const QString& args);
+
+    template <typename TFunc, typename TRet = decltype((std::declval<TFunc>())()), typename... TArgs>
+    TRet execute(int32_t ind, TFunc exe, TRet badVal, TArgs&&... args)
+    {
+        TRet rv(badVal);
+
+        if (ind > -1)
+        {
+           rv = exe(ind, std::forward<TArgs>(args)...);
+        }
+
+        return rv;
+    }
+
+
+
     Ui::CCommands *ui;
 
     CServerManager& m_serverMng = CServerManager::getReference();

@@ -115,6 +115,7 @@ CServerManager::TStringMap CServerManager::sendMsg(int idx, QString cmd, QString
 
     if (cli != m_cliMap.end())
     {
+
         rv = cli->second.sendMsg(std::move(cmd), std::move(args), rawJason);
     }
 
@@ -216,31 +217,34 @@ CServerManager::TStringMap CServerManager::SCliWrap::parse(QJsonRpcMessage msg)
 
     if (msg.type() == QJsonRpcMessage::Error)
     {
-        rv.emplace(TStringPair("Error", msg.errorData().toString()));
+        rv.emplace(TStringPair("Error",
+                               QString("Code: ") +
+                               QString(msg.errorCode()) +
+                               QString("Message: ") +
+                               msg.errorMessage()));
     }
     else
     {
         //QJsonDocument jsoDoc(QJsonDocument::fromJson(msg.result().toVariant()));
         auto var(msg.result().toVariant());
 
+        QString respons("");
+
          if (var.canConvert<QVariantList>())
          {
               QSequentialIterable iterable = var.value<QSequentialIterable>();
-
-              QString respons;
 
               for(auto& var : iterable)
               {
                    respons += var.toString() + RESP_SEPERATOR;
               }
-
-              rv.emplace(TStringPair("Response", respons));
          }
          else
          {
-             rv.emplace(TStringPair("Response", var.toString()));
+             respons = var.toString();
          }
 
+         rv.emplace(TStringPair("Response", respons));
     }
 
     return rv;

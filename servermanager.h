@@ -47,6 +47,13 @@ public:
 
     TStringMap sendMsg(int idx, QString cmd, QString args, QByteArray* rawJason = nullptr);
 
+    inline void setAddress(const uint32_t ind, const QString& add)
+    {
+        auto cli = m_cliMap.find(ind);
+
+        //cli.second->setAddress(std::move(add));
+    }
+
     //delete copy ctor and operator=
     CServerManager(CServerManager&) = delete;
     CServerManager operator=(CServerManager&) = delete;
@@ -90,6 +97,11 @@ private:
             return m_isActive ? ACTIVE : DEACTIVE;
         }
 
+        inline void setAddress(const QString& add)
+        {
+            m_myAddress = std::move(add);
+        }
+
 
     private:
         QString m_dockName;
@@ -98,6 +110,7 @@ private:
         QString m_demonRun;
         QString m_endPoint;
         bool m_isActive = false; //c++11 init style
+        QString m_myAddress;
         std::unique_ptr<CJasonHttpClient> m_cli;
 
         void runDockerCmd(const QString& args);

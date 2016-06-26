@@ -15,12 +15,28 @@ CShowResp::~CShowResp()
 }
 
 
-void CShowResp::showFullResp(QString& resp)
+void CShowResp::showFullResp(const QString& respName, const QString& resp, const QString& cmd)
 {
     //create string list from resp
-    auto respLst = resp.split(CServerManager::RESP_SEPERATOR);
+    auto respLst(resp.split(CServerManager::RESP_SEPERATOR));
+
+    auto lable(respName + " For: " + cmd);
+
+    ui->label->setText(std::move(lable));
 
     ui->listWidget->addItems(respLst);
 
     QDialog::show();
+}
+
+
+void CShowResp::on_buttonBox_accepted()
+{
+    ui->listWidget->clear();
+    hide();
+}
+
+void CShowResp::on_buttonBox_rejected()
+{
+    on_buttonBox_accepted();
 }
