@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Select Communication server:</string>
+    <string>Select Master server:</string>
    </property>
   </widget>
   <widget class="QComboBox" name="comboBox">
@@ -44,8 +44,8 @@
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>60</y>
+     <x>150</x>
+     <y>110</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -70,8 +70,8 @@
   <widget class="QPushButton" name="pushButton_3">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>60</y>
+     <x>10</x>
+     <y>110</y>
      <width>121</width>
      <height>27</height>
     </rect>
@@ -83,8 +83,8 @@
   <widget class="QPushButton" name="pushButton_4">
    <property name="geometry">
     <rect>
-     <x>280</x>
-     <y>60</y>
+     <x>270</x>
+     <y>110</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -127,6 +127,60 @@
    </property>
    <property name="text">
     <string>run</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>60</y>
+     <width>221</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Select Slave server:</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox_2">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>50</y>
+     <width>301</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>None</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QPushButton" name="pushButton_6">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>110</y>
+     <width>99</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>mine</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_7">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>150</y>
+     <width>121</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>transfare Coins</string>
    </property>
   </widget>
  </widget>

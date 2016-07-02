@@ -6,6 +6,7 @@
 #include "showresp.h"
 #include <utility>
 #include <iostream>
+#include <QComboBox>
 
 namespace Ui {
 class CCommands;
@@ -39,6 +40,8 @@ private slots:
 private:
 
     bool runCommand(const uint32_t ind, const QString& cmd, const QString& args);
+
+    void initCombo(QComboBox* combo, CServerManager::TServTable& data);
 
     template <typename TFunc, typename TRet = decltype((std::declval<TFunc>())()), typename... TArgs>
     TRet execute(int32_t ind, TFunc exe, TRet badVal, TArgs&&... args)

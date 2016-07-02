@@ -19,23 +19,29 @@ CCommands::~CCommands()
 
 void CCommands::show()
 {
-    ui->comboBox->clear();
-
     auto data = std::move(CServerManager::getReference().getTableData());
-    ui->comboBox->addItem("None", QVariant(-1));
+
+    initCombo(ui->comboBox, data);
+    initCombo(ui->comboBox_2, data);
+
+    QDialog::show();
+}
+
+void CCommands::initCombo(QComboBox* combo, CServerManager::TServTable &data)
+{
+    combo->clear();
+    combo->addItem("None", QVariant(-1));
 
     for (auto& outer : data)
     {
-        if (ui->comboBox->findText(outer.second["Name"]) == -1)
+        if (combo->findText(outer.second["Name"]) == -1)
         {
             if (outer.second["Status"] == CServerManager::ACTIVE)
             {
-                ui->comboBox->addItem(outer.second["Name"], QVariant(outer.first));
+                combo->addItem(outer.second["Name"], QVariant(outer.first));
             }
         }
     }
-
-    QDialog::show();
 }
 
 void CCommands::on_comboBox_activated(int index)

@@ -51,7 +51,7 @@ public:
     {
         auto cli = m_cliMap.find(ind);
 
-        //cli.second->setAddress(std::move(add));
+        cli->second.setAddress(std::move(add));
     }
 
     //delete copy ctor and operator=
@@ -99,7 +99,7 @@ private:
 
         inline void setAddress(const QString& add)
         {
-            m_myAddress = std::move(add);
+            m_myAddress = add;
         }
 
 
