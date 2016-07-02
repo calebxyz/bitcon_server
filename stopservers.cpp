@@ -25,12 +25,12 @@ void CStopServers::show()
 
     for (auto& outer : data)
     {
-        if (ui->comboBox->findText(outer.second["Name"]) == -1)
+        if (ui->comboBox->findText(outer.second[CServerManager::SERVER_NAME]) == -1)
         {
-            qDebug() << "the status is: " <<  outer.second["Status"];
-            if (outer.second["Status"] == CServerManager::ACTIVE)
+            qDebug() << "the status is: " <<  outer.second[CServerManager::STATUS];
+            if (outer.second[CServerManager::STATUS] == CServerManager::ACTIVE)
             {
-                ui->comboBox->addItem(outer.second["Name"], QVariant(outer.first));
+                ui->comboBox->addItem(outer.second[CServerManager::SERVER_NAME], QVariant(outer.first));
             }
         }
     }

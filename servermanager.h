@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "jasonHttpclient.h"
 
+
 namespace NBitcoinServer
 {
     class serverManager;
@@ -22,6 +23,11 @@ public:
     static const char* ACTIVE;
     static const char* DEACTIVE;
     static const char* RESP_SEPERATOR;
+    static const char* SERVER_NAME;
+    static const char* END_POINT;
+    static const char* ACCOUNT;
+    static const char* BALANCE;
+    static const char* STATUS;
 
     using TStringPair = std::pair<QString, QString>;
 

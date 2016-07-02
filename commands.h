@@ -39,7 +39,7 @@ private slots:
 
 private:
 
-    bool runCommand(const uint32_t ind, const QString& cmd, const QString& args);
+    bool runCommand(const uint32_t ind, const QString& cmd, const QString& args, QString& reslt);
 
     void initCombo(QComboBox* combo, CServerManager::TServTable& data);
 

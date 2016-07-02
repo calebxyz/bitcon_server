@@ -22,6 +22,11 @@ constexpr TDockCmdLine DOCKER{"docker"};
 const char* CServerManager::ACTIVE = "Active";
 const char* CServerManager::DEACTIVE = "Deactive";
 const char* CServerManager::RESP_SEPERATOR = "?!?!";
+const char* CServerManager::SERVER_NAME = "1_NAME";
+const char* CServerManager::END_POINT = "2_End Point";
+const char* CServerManager::ACCOUNT = "3_Account";
+const char* CServerManager::BALANCE = "4_Balance";
+const char* CServerManager::STATUS = "5_Status";
 
 //static definitions
 unsigned int CServerManager::s_id = 0;
@@ -98,12 +103,12 @@ CServerManager::TServTable CServerManager::getTableData()
     for (auto& cli : m_cliMap)
     {
        std::map<QString, QString> child;
-       child.emplace(std::pair<QString,QString>("1_Name", (cli.second).getName()));
-       child.emplace(std::pair<QString,QString>("2_End Point", (cli.second).getEndPoint()));
-       child.emplace(std::pair<QString,QString>("3_Account", (cli.second).getAddress()));
+       child.emplace(std::pair<QString,QString>(SERVER_NAME, (cli.second).getName()));
+       child.emplace(std::pair<QString,QString>(END_POINT, (cli.second).getEndPoint()));
+       child.emplace(std::pair<QString,QString>(ACCOUNT, (cli.second).getAddress()));
        std::string balance(std::to_string((cli.second.getBalance())));
-       child.emplace(std::pair<QString,QString>("4_Balance", QString(balance.c_str())));
-       child.emplace(std::pair<QString,QString>("5_Status", (cli.second).isActive()));
+       child.emplace(std::pair<QString,QString>(BALANCE, QString(balance.c_str())));
+       child.emplace(std::pair<QString,QString>(STATUS, (cli.second).isActive()));
 
        rv.emplace(std::pair<int, std::map<QString, QString> >(id++, std::move(child)));
     }

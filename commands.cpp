@@ -2,8 +2,9 @@
 #include "ui_commands.h"
 #include "servermanager.h"
 
-#define EXE_LAMBDA auto exe([this](int32_t ind, const QString& cmd, const QString& args)->bool \
-                        {return this->runCommand(ind, cmd, args);});
+#define EXE_LAMBDA QString reslt; \
+                   auto exe([this, &reslt](int32_t ind, const QString& cmd, const QString& args)->bool \
+                   {return this->runCommand(ind, cmd, args, reslt);});
 
 CCommands::CCommands(QWidget *parent) :
     QDialog(parent),
@@ -34,11 +35,11 @@ void CCommands::initCombo(QComboBox* combo, CServerManager::TServTable &data)
 
     for (auto& outer : data)
     {
-        if (combo->findText(outer.second["Name"]) == -1)
+        if (combo->findText(outer.second[CServerManager::SERVER_NAME]) == -1)
         {
-            if (outer.second["Status"] == CServerManager::ACTIVE)
+            if (outer.second[CServerManager::STATUS] == CServerManager::ACTIVE)
             {
-                combo->addItem(outer.second["Name"], QVariant(outer.first));
+                combo->addItem(CServerManager::SERVER_NAME, QVariant(outer.first));
             }
         }
     }
@@ -55,10 +56,19 @@ void CCommands::on_pushButton_clicked()
 {
     auto ind(ui->comboBox->currentData().toInt());
 
-    if (ind > -1)
+    EXE_LAMBDA;
+
+    auto status = execute(ind, std::move(exe), false, QString("getbalance"), QString(""));
+
+    if (status)
+    {
+        m_serverMng.setBalance(ind, reslt.toLongLong());
+    }
+
+    /*if (ind > -1)
     {
         runCommand(ind, "getbalance", "");
-    }
+    }*/
 
 }
 
@@ -71,13 +81,17 @@ void CCommands::on_pushButton_3_clicked()
 {
     auto ind(ui->comboBox->currentData().toInt());
 
-    auto exe([this](int32_t ind, const QString& cmd, const QString& args)->bool
-    {return this->runCommand(ind, cmd, args);});
+    EXE_LAMBDA;
 
-    execute(ind, std::move(exe), false, QString("getnewaddress"), QString(""));
+    auto status = execute(ind, std::move(exe), false, QString("getnewaddress"), QString(""));
+
+    if (status)
+    {
+        m_serverMng.setBalance(ind, reslt.toLongLong());
+    }
 }
 
-bool CCommands::runCommand(const uint32_t ind, const QString& cmd, const QString& args)
+bool CCommands::runCommand(const uint32_t ind, const QString& cmd, const QString& args, QString& reslt)
 {
     bool rv(true);
 
@@ -95,6 +109,8 @@ bool CCommands::runCommand(const uint32_t ind, const QString& cmd, const QString
     {
         rv = false;
     }
+
+    reslt = res->first;
 
     m_respShower.showFullResp(res->first, res->second, cmd);
 
