@@ -98,9 +98,12 @@ CServerManager::TServTable CServerManager::getTableData()
     for (auto& cli : m_cliMap)
     {
        std::map<QString, QString> child;
-       child.emplace(std::pair<QString,QString>("Name", (cli.second).getName()));
-       child.emplace(std::pair<QString,QString>("End Point", (cli.second).getEndPoint()));
-       child.emplace(std::pair<QString,QString>("Status", (cli.second).isActive()));
+       child.emplace(std::pair<QString,QString>("1_Name", (cli.second).getName()));
+       child.emplace(std::pair<QString,QString>("2_End Point", (cli.second).getEndPoint()));
+       child.emplace(std::pair<QString,QString>("3_Account", (cli.second).getAddress()));
+       std::string balance(std::to_string((cli.second.getBalance())));
+       child.emplace(std::pair<QString,QString>("4_Balance", QString(balance.c_str())));
+       child.emplace(std::pair<QString,QString>("5_Status", (cli.second).isActive()));
 
        rv.emplace(std::pair<int, std::map<QString, QString> >(id++, std::move(child)));
     }

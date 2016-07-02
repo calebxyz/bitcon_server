@@ -30,7 +30,7 @@ void CShow::on_pushButton_2_clicked()
 
     for (auto& lable : std::begin(tableData)->second)
     {
-       lables << lable.first;
+       lables << ((lable.first).split("_"))[1];
     }
 
     ui->tableWidget->setHorizontalHeaderLabels(lables);
@@ -44,7 +44,7 @@ void CShow::on_pushButton_2_clicked()
         int outerIdx(outer.first);
         for (auto& inner : outer.second)
         {
-            ui->tableWidget->setColumnWidth(innerIdx, inner.second.size()+149);
+            ui->tableWidget->setColumnWidth(innerIdx, inner.second.size()+154);
             ui->tableWidget->setItem(outerIdx, innerIdx++, new QTableWidgetItem(inner.second));
         }
     }

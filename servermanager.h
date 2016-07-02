@@ -51,7 +51,14 @@ public:
     {
         auto cli = m_cliMap.find(ind);
 
-        cli->second.setAddress(std::move(add));
+        cli->second.setAddress(add);
+    }
+
+    inline void setBalance(const uint32_t ind, const qlonglong balance)
+    {
+        auto cli = m_cliMap.find(ind);
+
+        cli->second.setBalance(balance);
     }
 
     //delete copy ctor and operator=
@@ -102,6 +109,21 @@ private:
             m_myAddress = add;
         }
 
+        inline void setBalance(const qlonglong balance)
+        {
+            m_balance = balance;
+        }
+
+        inline qlonglong getBalance()
+        {
+            return m_balance;
+        }
+
+        inline QString& getAddress()
+        {
+            return m_myAddress;
+        }
+
 
     private:
         QString m_dockName;
@@ -110,7 +132,8 @@ private:
         QString m_demonRun;
         QString m_endPoint;
         bool m_isActive = false; //c++11 init style
-        QString m_myAddress;
+        QString m_myAddress = "N/A";
+        qlonglong m_balance = -1;
         std::unique_ptr<CJasonHttpClient> m_cli;
 
         void runDockerCmd(const QString& args);
