@@ -167,7 +167,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>mine</string>
+    <string>Mine</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_7">
@@ -180,7 +180,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>transfare Coins</string>
+    <string>Transfare Coins</string>
    </property>
   </widget>
  </widget>
