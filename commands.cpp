@@ -1,6 +1,7 @@
 #include "commands.h"
 #include "ui_commands.h"
 #include "servermanager.h"
+#include "argwindowmine.h"
 
 #define EXE_LAMBDA QString reslt; \
                    auto exe([this, &reslt](int32_t ind, const QString& cmd, const QString& args)->bool \
@@ -110,7 +111,7 @@ bool CCommands::runCommand(const uint32_t ind, const QString& cmd, const QString
         rv = false;
     }
 
-    reslt = res->first;
+    reslt = res->second;
 
     m_respShower.showFullResp(res->first, res->second, cmd);
 
@@ -141,4 +142,24 @@ void CCommands::on_pushButton_5_clicked()
     EXE_LAMBDA;
 
     execute(ind, std::move(exe), false, cmd, args);
+}
+
+void CCommands::on_pushButton_6_clicked()
+{
+    cargWindow argWin;
+
+    auto ind(ui->comboBox->currentData().toInt());
+
+    std::thread getArgs([&argWin](){argWin.show();});
+
+    std::this_thread::sleep_for(std::chrono::duration<double>(0.5));
+    auto args(argWin.getBlocks());
+
+    QString cmd("generate");
+
+    EXE_LAMBDA;
+
+    execute(ind, std::move(exe), false, cmd, args);
+
+    getArgs.join();
 }

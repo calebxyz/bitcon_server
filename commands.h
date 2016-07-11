@@ -37,6 +37,8 @@ private slots:
 
     void on_pushButton_5_clicked();
 
+    void on_pushButton_6_clicked();
+
 private:
 
     bool runCommand(const uint32_t ind, const QString& cmd, const QString& args, QString& reslt);

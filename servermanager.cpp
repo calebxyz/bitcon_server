@@ -234,13 +234,14 @@ CServerManager::TStringMap CServerManager::SCliWrap::parse(QJsonRpcMessage msg)
     else
     {
         //QJsonDocument jsoDoc(QJsonDocument::fromJson(msg.result().toVariant()));
-        auto var(msg.result().toVariant());
+        auto respFromServer(msg.result());
+        auto variant(respFromServer.toVariant());
 
         QString respons("");
 
-         if (var.canConvert<QVariantList>())
+         if (variant.canConvert<QVariantList>())
          {
-              QSequentialIterable iterable = var.value<QSequentialIterable>();
+              QSequentialIterable iterable = variant.value<QSequentialIterable>();
 
               for(auto& var : iterable)
               {
@@ -249,7 +250,7 @@ CServerManager::TStringMap CServerManager::SCliWrap::parse(QJsonRpcMessage msg)
          }
          else
          {
-             respons = var.toString();
+             respons = variant.toString();
          }
 
          rv.emplace(TStringPair("Response", respons));
