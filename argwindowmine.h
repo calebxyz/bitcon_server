@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <future>
+#include <functional>
 
 namespace Ui {
 class cargWindow;
@@ -16,7 +17,7 @@ public:
     explicit cargWindow(QWidget *parent = 0);
     ~cargWindow();
 
-    void show();
+    void show(std::function<bool (const QString&)> func);
 
     inline QString getBlocks()
     {
@@ -31,7 +32,7 @@ private slots:
 private:
     Ui::cargWindow *ui;
     std::promise<QString> m_blocksPromis;
-    bool m_exit = false;
+    std::function<bool (const QString&)> m_callback;
 };
 
 #endif // ARGWINDOW_H

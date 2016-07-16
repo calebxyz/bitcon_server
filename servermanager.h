@@ -144,6 +144,10 @@ private:
 
         void runDockerCmd(const QString& args);
         TStringMap parse(QJsonRpcMessage msg);
+        void parse(const QJsonArray& arr, QString& respMap);
+        void parse(const QJsonObject& obj,QString& respMap);
+        void parse(const QJsonValue& val, QString& respMap);
+        void parseByType(const QJsonValue& val, QString& respMap);
     };
 
     template <typename TFunc>

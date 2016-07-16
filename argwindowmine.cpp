@@ -13,16 +13,12 @@ cargWindow::~cargWindow()
     delete ui;
 }
 
-void cargWindow::show()
+void cargWindow::show(std::function<bool (const QString&)> func, QString lable)
 {
-    m_exit = false;
+    m_callback = std::move(func);
+    ui->label->setText(lable);
     ui->lineEdit->setText("0");
     QDialog::show();
-
-    while (!m_exit)
-    {
-        std::this_thread::sleep_for(std::chrono::duration<double>(0.1));
-    }
 }
 
 void cargWindow::on_pushButton_clicked()
@@ -33,16 +29,12 @@ void cargWindow::on_pushButton_clicked()
 
     lineTxt.toLongLong(&ok);
 
-    if (ok)
+    if (!ok)
     {
-        m_blocksPromis.set_value(std::move(std::move(lineTxt)));
-    }
-    else
-    {
-        m_blocksPromis.set_value("0");
+        lineTxt = "0";
     }
 
-    m_exit = true;
+    m_callback(lineTxt);
 
     QDialog::hide();
 }

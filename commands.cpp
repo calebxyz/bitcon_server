@@ -63,7 +63,8 @@ void CCommands::on_pushButton_clicked()
 
     if (status)
     {
-        m_serverMng.setBalance(ind, reslt.toLongLong());
+        auto balance(reslt.split(CServerManager::RESP_SEPERATOR));
+        m_serverMng.setBalance(ind, balance[0].toLongLong());
     }
 
     /*if (ind > -1)
@@ -88,7 +89,7 @@ void CCommands::on_pushButton_3_clicked()
 
     if (status)
     {
-        m_serverMng.setAddress(ind, reslt);
+        m_serverMng.setAddress(ind, reslt.split(CServerManager::RESP_SEPERATOR)[0]);
     }
 }
 
@@ -146,20 +147,22 @@ void CCommands::on_pushButton_5_clicked()
 
 void CCommands::on_pushButton_6_clicked()
 {
-    cargWindow argWin;
+    static cargWindow argWin;
 
     auto ind(ui->comboBox->currentData().toInt());
 
-    std::thread getArgs([&argWin](){argWin.show();});
-
-    std::this_thread::sleep_for(std::chrono::duration<double>(0.5));
-    auto args(argWin.getBlocks());
-
     QString cmd("generate");
 
-    EXE_LAMBDA;
+    auto subExeFunc([this, ind, cmd](const QString& args)->bool
+    {
+        EXE_LAMBDA;
+        return execute(ind, std::move(exe), false, cmd, args);
+    });
 
-    execute(ind, std::move(exe), false, cmd, args);
+    argWin.show(std::move(subExeFunc), "Number Of Blocks");
+}
 
-    getArgs.join();
+void CCommands::on_pushButton_7_clicked()
+{
+ `
 }

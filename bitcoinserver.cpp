@@ -18,6 +18,7 @@ BitcoinServer::~BitcoinServer()
 void BitcoinServer::on_pushButton_clicked()
 {
     qDebug() << "GoodBye";
+    m_manager.deleteAll();
     exit(0);
 }
 

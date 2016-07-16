@@ -235,28 +235,53 @@ CServerManager::TStringMap CServerManager::SCliWrap::parse(QJsonRpcMessage msg)
     {
         //QJsonDocument jsoDoc(QJsonDocument::fromJson(msg.result().toVariant()));
         auto respFromServer(msg.result());
-        auto variant(respFromServer.toVariant());
-
         QString respons("");
 
-         if (variant.canConvert<QVariantList>())
-         {
-              QSequentialIterable iterable = variant.value<QSequentialIterable>();
+        parseByType(respFromServer, respons);
 
-              for(auto& var : iterable)
-              {
-                   respons += var.toString() + RESP_SEPERATOR;
-              }
-         }
-         else
-         {
-             respons = variant.toString();
-         }
-
-         rv.emplace(TStringPair("Response", respons));
+        rv.emplace(TStringPair("Response", respons));
     }
 
     return rv;
+}
+
+
+void CServerManager::SCliWrap::parse(const QJsonArray& arr, QString& respMap)
+{
+    qDebug() << "The resualt is an array";
+
+    uint32_t ind(0);
+    QString item("Item %1: ");
+
+    for (const auto& arrItem : arr)
+    {
+        qDebug() << item.arg(ind) << arrItem;
+        respMap += item.arg(ind) + ": \n";
+        parseByType(arrItem, respMap);
+        ind++;
+    }
+}
+
+void CServerManager::SCliWrap::parse(const QJsonObject& obj, QString& respMap)
+{
+    qDebug() << "The resualt is an Object";
+
+    auto variantMap(obj.toVariantMap());
+
+    for (auto mapIter = variantMap.begin(); mapIter != variantMap.end(); ++mapIter)
+    {
+        qDebug() << "pushing item Key: " << mapIter.key() << "Val: " << mapIter.value();
+        respMap += mapIter.key() + " : " +  mapIter.value().toString() + "\n" + RESP_SEPERATOR;
+    }
+}
+
+void CServerManager::SCliWrap::parse(const QJsonValue& val, QString& respMap)
+{
+    qDebug() << "The resuat is a regular value: " << val;
+
+    auto var = val.toVariant();
+
+    respMap += var.toString() + RESP_SEPERATOR;
 }
 
 QString CServerManager::SCliWrap::toString()
@@ -266,4 +291,20 @@ QString CServerManager::SCliWrap::toString()
     rv = "Name: " + getName() + " End Point: " + getEndPoint() + "Status: " + isActive();
 
     return rv;
+}
+
+void CServerManager::SCliWrap::parseByType(const QJsonValue& val, QString& respMap)
+{
+    if (val.isArray())
+    {
+        parse(val.toArray(), respMap);
+    }
+    else if (val.isObject())
+    {
+        parse(val.toObject(), respMap);
+    }
+    else
+    {
+        parse(val, respMap);
+    }
 }
