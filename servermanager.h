@@ -28,6 +28,9 @@ public:
     static const char* ACCOUNT;
     static const char* BALANCE;
     static const char* STATUS;
+    static const char* BASE_IP;
+    static const char* INVALID_IP;
+    static const uint32_t BASE_IP_STATION;
 
     using TStringPair = std::pair<QString, QString>;
 
@@ -52,6 +55,8 @@ public:
     TServTable getTableData();
 
     TStringMap sendMsg(int idx, QString cmd, QString args, QByteArray* rawJason = nullptr);
+
+    QString getIp(int idx);
 
     inline void setAddress(const uint32_t ind, const QString& add)
     {

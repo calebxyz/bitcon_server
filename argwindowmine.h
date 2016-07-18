@@ -17,7 +17,7 @@ public:
     explicit cargWindow(QWidget *parent = 0);
     ~cargWindow();
 
-    void show(std::function<bool (const QString&)> func, QString lable);
+    void show(std::function<bool (const QString&)> func, QString lable, bool tryToConvert = true);
 
     inline QString getBlocks()
     {
@@ -33,6 +33,7 @@ private:
     Ui::cargWindow *ui;
     std::promise<QString> m_blocksPromis;
     std::function<bool (const QString&)> m_callback;
+    bool m_tryToConert;
 };
 
 #endif // ARGWINDOW_H

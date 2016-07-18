@@ -64,7 +64,7 @@ void CCommands::on_pushButton_clicked()
     if (status)
     {
         auto balance(reslt.split(CServerManager::RESP_SEPERATOR));
-        m_serverMng.setBalance(ind, balance[0].toLongLong());
+        m_serverMng.setBalance(ind, balance[0].toFloat());
     }
 
     /*if (ind > -1)
@@ -182,6 +182,47 @@ void CCommands::on_pushButton_7_clicked()
             return execute(indSender, std::move(exe), false, cmd, add + args);
         });
 
-        argWin.show(std::move(subExeFunc), "Number Of Bitcoins");
+        argWin.show(std::move(subExeFunc), "Number Of Coins");
     }
+}
+
+void CCommands::on_pushButton_8_clicked()
+{
+    auto sndrInd(ui->comboBox->currentData().toInt());
+    auto rcvrInd(ui->comboBox_2->currentData().toInt());
+
+    auto cmd("addnode");
+
+    auto sndrIp(m_serverMng.getIp(sndrInd));
+    auto rcvrIp(m_serverMng.getIp(rcvrInd));
+
+    if (sndrIp != CServerManager::INVALID_IP && rcvrIp != CServerManager::INVALID_IP)
+    {
+        auto args = rcvrIp + " onetry";
+        EXE_LAMBDA;
+        execute(sndrInd, std::move(exe), false, cmd, args);
+    }
+
+}
+
+void CCommands::on_pushButton_9_clicked()
+{
+    auto ind(ui->comboBox->currentData().toInt());
+
+    auto cmd("getinfo");
+
+    EXE_LAMBDA;
+
+    execute(ind, std::move(exe), false, cmd, QString(""));
+}
+
+void CCommands::on_pushButton_10_clicked()
+{
+    auto ind(ui->comboBox_2->currentData().toInt());
+
+    auto cmd("getinfo");
+
+    EXE_LAMBDA;
+
+    execute(ind, std::move(exe), false, cmd, QString(""));
 }

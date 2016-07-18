@@ -13,11 +13,13 @@ cargWindow::~cargWindow()
     delete ui;
 }
 
-void cargWindow::show(std::function<bool (const QString&)> func, QString lable)
+void cargWindow::show(std::function<bool (const QString&)> func, QString lable, bool tryToConvert)
 {
     m_callback = std::move(func);
     ui->label->setText(lable);
+    ui->label->setAlignment(Qt::AlignHCenter);
     ui->lineEdit->setText("0");
+    m_tryToConert = tryToConvert;
     QDialog::show();
 }
 
@@ -25,9 +27,12 @@ void cargWindow::on_pushButton_clicked()
 {
     QString lineTxt(ui->lineEdit->text());
 
-    bool ok(false);
+    bool ok(true);
 
-    lineTxt.toLongLong(&ok);
+    if (m_tryToConert)
+    {
+        lineTxt.toLongLong(&ok);
+    }
 
     if (!ok)
     {
