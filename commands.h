@@ -8,6 +8,7 @@
 #include <iostream>
 #include <QComboBox>
 #include <logable.h>
+#include <QVector>
 
 namespace Ui {
 class CCommands;
@@ -23,6 +24,11 @@ public:
 
     //overides the widget show function
     void show();
+
+    void addNode(quint32 sndrId, quint32 rcvrId, bool showResp = true);
+
+    //add all serveres to all nodes
+    void regAllServer();
 
 
 private slots:
@@ -48,26 +54,28 @@ private slots:
 
     void on_pushButton_10_clicked();
 
+    void on_pushButton_11_clicked();
+
 private:
 
-    bool runCommand(const uint32_t ind, const QString& cmd, const QString& args, QString& reslt);
+    bool runCommand(const uint32_t ind, bool showResp, const QString& cmd, const QString& args, QString& reslt);
 
     void initCombo(QComboBox* combo, CServerManager::TServTable& data);
 
+    QVector<quint32> getActiveServerList();
+
     template <typename TFunc, typename TRet = decltype((std::declval<TFunc>())()), typename... TArgs>
-    TRet execute(int32_t ind, TFunc exe, TRet badVal, TArgs&&... args)
+    TRet execute(int32_t ind, TFunc exe, TRet badVal, bool showResp, TArgs&&... args)
     {
         TRet rv(badVal);
 
         if (ind > -1)
         {
-           rv = exe(ind, std::forward<TArgs>(args)...);
+           rv = exe(ind, showResp, std::forward<TArgs>(args)...);
         }
 
         return rv;
     }
-
-
 
     Ui::CCommands *ui;
 

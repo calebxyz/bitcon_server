@@ -4,8 +4,8 @@
 #include "argwindowmine.h"
 
 #define EXE_LAMBDA QString reslt; \
-                   auto exe([this, &reslt](int32_t ind, const QString& cmd, const QString& args)->bool \
-                   {return this->runCommand(ind, cmd, args, reslt);});
+                   auto exe([this, &reslt](int32_t ind, bool showResp, const QString& cmd, const QString& args)->bool \
+                   {return this->runCommand(ind, showResp, cmd, args, reslt);});
 
 CCommands::CCommands(QWidget *parent) :
     QDialog(parent),
@@ -60,7 +60,7 @@ void CCommands::on_pushButton_clicked()
 
     EXE_LAMBDA;
 
-    auto status = execute(ind, std::move(exe), false, QString("getbalance"), QString(""));
+    auto status = execute(ind, std::move(exe), false, true, QString("getbalance"), QString(""));
 
     if (status)
     {
@@ -86,7 +86,7 @@ void CCommands::on_pushButton_3_clicked()
 
     EXE_LAMBDA;
 
-    auto status = execute(ind, std::move(exe), false, QString("getnewaddress"), QString(""));
+    auto status = execute(ind, std::move(exe), false, true, QString("getnewaddress"), QString(""));
 
     if (status)
     {
@@ -94,7 +94,7 @@ void CCommands::on_pushButton_3_clicked()
     }
 }
 
-bool CCommands::runCommand(const uint32_t ind, const QString& cmd, const QString& args, QString& reslt)
+bool CCommands::runCommand(const uint32_t ind, bool showResp, const QString& cmd, const QString& args, QString& reslt)
 {
     bool rv(true);
     std::string errMsg("");
@@ -118,7 +118,10 @@ bool CCommands::runCommand(const uint32_t ind, const QString& cmd, const QString
 
     reslt = res->second;
 
-    m_respShower.showFullResp(res->first, res->second, cmd);
+    if (showResp)
+    {
+        m_respShower.showFullResp(res->first, res->second, cmd);
+    }
 
     return rv;
 }
@@ -129,7 +132,7 @@ void CCommands::on_pushButton_4_clicked()
 
     EXE_LAMBDA;
 
-    execute(ind, std::move(exe), false, QString("getpeerinfo"), QString(""));
+    execute(ind, std::move(exe), false, true, QString("getpeerinfo"), QString(""));
 }
 
 void CCommands::on_pushButton_5_clicked()
@@ -146,7 +149,7 @@ void CCommands::on_pushButton_5_clicked()
 
     EXE_LAMBDA;
 
-    execute(ind, std::move(exe), false, cmd, args);
+    execute(ind, std::move(exe), false, true, cmd, args);
 }
 
 void CCommands::on_pushButton_6_clicked()
@@ -160,7 +163,7 @@ void CCommands::on_pushButton_6_clicked()
     auto subExeFunc([this, ind, cmd](const QString& args)->bool
     {
         EXE_LAMBDA;
-        return execute(ind, std::move(exe), false, cmd, args);
+        return execute(ind, std::move(exe), false, true, cmd, args);
     });
 
     argWin.show(std::move(subExeFunc), "Number Of Blocks");
@@ -183,10 +186,24 @@ void CCommands::on_pushButton_7_clicked()
         auto subExeFunc([this, indSender, cmd, add](const QString& args)->bool
         {
             EXE_LAMBDA;
-            return execute(indSender, std::move(exe), false, cmd, add + args);
+            return execute(indSender, std::move(exe), false, true, cmd, add + args);
         });
 
         argWin.show(std::move(subExeFunc), "Number Of Coins");
+    }
+}
+
+void CCommands::addNode(quint32 sndrId, quint32 rcvrId, bool showResp)
+{
+    auto sndrIp(m_serverMng.getIp(sndrId));
+    auto rcvrIp(m_serverMng.getIp(rcvrId));
+    auto cmd("addnode");
+
+    if (sndrIp != CServerManager::INVALID_IP && rcvrIp != CServerManager::INVALID_IP)
+    {
+        auto args = rcvrIp + " onetry";
+        EXE_LAMBDA;
+        execute(sndrId, std::move(exe), false, showResp, cmd, args);
     }
 }
 
@@ -195,18 +212,7 @@ void CCommands::on_pushButton_8_clicked()
     auto sndrInd(ui->comboBox->currentData().toInt());
     auto rcvrInd(ui->comboBox_2->currentData().toInt());
 
-    auto cmd("addnode");
-
-    auto sndrIp(m_serverMng.getIp(sndrInd));
-    auto rcvrIp(m_serverMng.getIp(rcvrInd));
-
-    if (sndrIp != CServerManager::INVALID_IP && rcvrIp != CServerManager::INVALID_IP)
-    {
-        auto args = rcvrIp + " onetry";
-        EXE_LAMBDA;
-        execute(sndrInd, std::move(exe), false, cmd, args);
-    }
-
+    addNode(sndrInd, rcvrInd);
 }
 
 void CCommands::on_pushButton_9_clicked()
@@ -217,7 +223,7 @@ void CCommands::on_pushButton_9_clicked()
 
     EXE_LAMBDA;
 
-    execute(ind, std::move(exe), false, cmd, QString(""));
+    execute(ind, std::move(exe), false, true, cmd, QString(""));
 }
 
 void CCommands::on_pushButton_10_clicked()
@@ -228,5 +234,44 @@ void CCommands::on_pushButton_10_clicked()
 
     EXE_LAMBDA;
 
-    execute(ind, std::move(exe), false, cmd, QString(""));
+    execute(ind, std::move(exe), false, true, cmd, QString(""));
+}
+
+QVector<quint32> CCommands::getActiveServerList()
+{
+    QVector<quint32> rv;
+
+    auto data = std::move(CServerManager::getReference().getTableData());
+
+    for (auto& outer : data)
+    {
+        if (outer.second[CServerManager::STATUS] == CServerManager::ACTIVE)
+        {
+            rv.push_back(outer.first);
+        }
+    }
+
+    return rv;
+}
+
+void CCommands::regAllServer()
+{
+    std::string errMsg("");
+
+    auto servers = getActiveServerList();
+
+    LOGGER_HELPER(TRACE, errMsg, "Registering servers: [ ", servers, " ]");
+
+    for (auto regIter(servers.begin()); regIter != servers.end(); regIter++)
+    {
+        for (auto acceptIter(regIter+1); acceptIter != servers.end(); acceptIter++)
+        {
+            addNode(*regIter, *acceptIter, false);
+        }
+    }
+}
+
+void CCommands::on_pushButton_11_clicked()
+{
+    regAllServer();
 }
