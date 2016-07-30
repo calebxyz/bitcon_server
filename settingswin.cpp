@@ -5,6 +5,7 @@
 
 CSettingsWin::CSettingsWin(QWidget *parent) :
     QDialog(parent),
+    CLogable("SettingDialogLog"),
     ui(new Ui::CSettingsWin)
 {
     ui->setupUi(this);
@@ -18,19 +19,22 @@ CSettingsWin::~CSettingsWin()
 void CSettingsWin::on_buttonBox_accepted()
 {
     int numOfDockers = ((ui->lineEdit)->text()).toInt();
+    std::string errMsg("");
 
     for (int docker(0); docker < numOfDockers; ++docker)
     {
         CServerManager::getReference().registerClient();
     }
 
-    qDebug() << "Created: " << numOfDockers << " Servers";
+    //qDebug() << "Created: " << numOfDockers << " Servers";
+    LOGGER_HELPER(DEBUG, errMsg, "Created: " , numOfDockers, " Servers");
 
 }
 
 void CSettingsWin::on_buttonBox_rejected()
 {
-    qDebug() << "Canceled";
+    std::string errMsg("");
+    LOGGER_HELPER(DEBUG, errMsg, "Oper canceled");
 
 }
 

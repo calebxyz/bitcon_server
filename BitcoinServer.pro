@@ -6,6 +6,9 @@
 JASON = ../qjsonrpc/
 HTTP_LIB = $${JASON}/tests/manual/build-httpclient-Desktop_Qt_5_6_0_GCC_64bit-Debug
 HTTP_INC = $${JASON}/tests/manual/httpclient
+LIB4CXX_LIB = /usr/lib
+LIB4CXX_INC = /usr/include/log4cxx
+
 include($${JASON}/qjsonrpc.pri)
 include($${JASON}/tests/tests.pri)
 
@@ -26,7 +29,8 @@ SOURCES += main.cpp \
     show.cpp \
     commands.cpp \
     showresp.cpp \
-    argwindowmine.cpp
+    argwindowmine.cpp \
+    logable.cpp
         bitcoinserver.cpp
 
 HEADERS  += bitcoinserver.h\
@@ -38,7 +42,8 @@ HEADERS  += bitcoinserver.h\
     show.h \
     commands.h \
     showresp.h \
-    argwindowmine.h
+    argwindowmine.h \
+    logable.h
 
 FORMS    += bitcoinserver.ui \
     settingswin.ui \
@@ -49,6 +54,13 @@ FORMS    += bitcoinserver.ui \
     showresp.ui \
     argwindowmine.ui
 
-LIBS += -L $${HTTP_LIB} -ljasonhttpclient
+LIBS += -L $${HTTP_LIB}  -L $${LOG4CXX_LIB} -ljasonhttpclient -llog4cxx
 
 INCLUDEPATH += $${HTTP_INC}
+INCLUDEPATH += $${LOG4CXX_INC}
+
+DISTFILES +=\
+bitCoinserver.log4cxx
+
+DESTDIR += ~/BitcoinServerManager
+

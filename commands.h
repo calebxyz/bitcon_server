@@ -7,12 +7,13 @@
 #include <utility>
 #include <iostream>
 #include <QComboBox>
+#include <logable.h>
 
 namespace Ui {
 class CCommands;
 }
 
-class CCommands : public QDialog
+class CCommands : public QDialog, CLogable
 {
     Q_OBJECT
 

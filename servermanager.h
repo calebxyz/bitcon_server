@@ -6,14 +6,14 @@
 #include <memory>
 #include <algorithm>
 #include "jasonHttpclient.h"
-
+#include "logable.h"
 
 namespace NBitcoinServer
 {
     class serverManager;
 }
 
-class CServerManager : public QObject
+class CServerManager : public QObject, CLogable
 {
     Q_OBJECT
 public:
@@ -93,7 +93,7 @@ private:
 
     explicit CServerManager(QObject *parent = 0);
 
-    struct SCliWrap
+    struct SCliWrap: public CLogable
     {
     public:
         SCliWrap(unsigned int port, unsigned int id);

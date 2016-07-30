@@ -8,12 +8,13 @@
 #include "stopservers.h"
 #include "show.h"
 #include "commands.h"
+#include "logable.h"
 
 namespace Ui {
 class BitcoinServer;
 }
 
-class BitcoinServer : public QMainWindow
+class BitcoinServer : public QMainWindow, CLogable
 {
     Q_OBJECT
 

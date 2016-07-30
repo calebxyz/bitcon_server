@@ -2,12 +2,13 @@
 #define STOPSERVERS_H
 
 #include <QDialog>
+#include "logable.h"
 
 namespace Ui {
 class CStopServers;
 }
 
-class CStopServers : public QDialog
+class CStopServers : public QDialog, CLogable
 {
     Q_OBJECT
 

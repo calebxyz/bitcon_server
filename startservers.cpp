@@ -6,6 +6,7 @@
 
 CStartServers::CStartServers(QWidget *parent) :
     QDialog(parent),
+    CLogable("StartServerDialogLog"),
     ui(new Ui::StartServers)
 {
     ui->setupUi(this);
@@ -18,6 +19,7 @@ CStartServers::~CStartServers()
 
 void CStartServers::show()
 {
+    std::string errMsg("");
     ui->comboBox->clear();
 
     auto data = std::move(CServerManager::getReference().getTableData());
@@ -28,7 +30,8 @@ void CStartServers::show()
     {
         if (ui->comboBox->findText(outer.second[CServerManager::SERVER_NAME]) == -1)
         {
-            qDebug() << "the status is: " <<  outer.second["Status"];
+            //qDebug() << "the status is: " <<  outer.second["Status"];
+            LOGGER_HELPER(DEBUG, errMsg, QString("the status is "),  outer.second["Status"]);
             if (outer.second[CServerManager::STATUS] == CServerManager::DEACTIVE)
             {
                 ui->comboBox->addItem(outer.second[CServerManager::SERVER_NAME], QVariant(outer.first));
@@ -42,10 +45,12 @@ void CStartServers::show()
 void CStartServers::on_pushButton_clicked()
 {
 
+    std::string errMsg("");
     auto currVal = ui->comboBox->currentData().toString();
     (currVal == "-1") ? currVal = "All" : "";
 
-    qDebug() << "Strting server: [ "  << currVal << "]";
+    //qDebug() << "Strting server: [ "  << currVal << "]";
+    LOGGER_HELPER(DEBUG, errMsg, "Starting server: [ ", currVal ," ]");
 
     if (currVal == "All")
     {

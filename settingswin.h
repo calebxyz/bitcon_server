@@ -2,12 +2,13 @@
 #define SETTINGSWIN_H
 
 #include <QDialog>
+#include "logable.h"
 
 namespace Ui {
 class CSettingsWin;
 }
 
-class CSettingsWin : public QDialog
+class CSettingsWin : public QDialog, CLogable
 {
     Q_OBJECT
 

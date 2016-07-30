@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <QDebug>
 #include <QJsonDocument>
+#include <QBuffer>
+#include <string>
 
 #define CLI_WRAPPER CServerManager::SCliWrap;
 
@@ -40,7 +42,7 @@ unsigned int CServerManager::s_port = 8888;
 
 using namespace NBitcoinServer;
 
-CServerManager::CServerManager(QObject *parent) : QObject(parent)
+CServerManager::CServerManager(QObject *parent) : QObject(parent), CLogable("ServerManagerLogger")
 {}
 
 CServerManager& CServerManager::getReference()
@@ -152,7 +154,7 @@ QString CServerManager::getIp(int idx)
 
 
 //wrapper implementation
-CServerManager::SCliWrap::SCliWrap(unsigned int id, unsigned int port)
+CServerManager::SCliWrap::SCliWrap(unsigned int id, unsigned int port) : CLogable("ServerMangerCLILogger")
 {
     m_dockName = std::move(QString(DOCKER_NAME).arg(QString(std::to_string(id).c_str())));
     m_dockRm = std::move(QString(DOCKER_RM).arg(m_dockName));
@@ -169,7 +171,7 @@ bool CServerManager::SCliWrap::run()
 
     QString dockStr(std::move(this->toString()));
 
-    qDebug() << "starting :" << dockStr;
+    LOGGER_HELPER(DEBUG, dockStr.toStdString());
 
     //build docker
     QString buildDocker(DOCKER_BUILD);
@@ -226,17 +228,22 @@ void CServerManager::SCliWrap::runDockerCmd(const QString& args)
     QStringList arguments(std::move(args.split(" ")));
 
     QProcess proc;
+    std::string errMsg("");
 
-    qDebug() << "Running command: " << DOCKER << "args:" + args;
+    LOGGER_HELPER(DEBUG, errMsg, std::string("Running command: ") + DOCKER + "args:" + args.toStdString());
+    //qDebug() << "Running command: " << DOCKER << "args:" + args;
 
     proc.start(DOCKER, std::move(arguments));
 
     if (!proc.waitForFinished())
     {
-        qDebug() << "Error couldnt start finish command!";
+        LOGGER_HELPER(ERROR, errMsg, "Error couldnt start finish command!");
+        //qDebug() << "Error couldnt start finish command!";
     }
 
-    qDebug() << "run finished with: " << proc.readAllStandardOutput() << proc.readAllStandardError();
+    LOGGER_HELPER(DEBUG, errMsg ,std::string("run finished with: ") , proc.readAllStandardOutput().toStdString()
+                  , proc.readAllStandardError().toStdString());
+    //qDebug() << "run finished with: " << proc.readAllStandardOutput() << proc.readAllStandardError();
 }
 
 CServerManager::TStringMap CServerManager::SCliWrap::parse(QJsonRpcMessage msg)
@@ -268,14 +275,19 @@ CServerManager::TStringMap CServerManager::SCliWrap::parse(QJsonRpcMessage msg)
 
 void CServerManager::SCliWrap::parse(const QJsonArray& arr, QString& respMap)
 {
-    qDebug() << "The resualt is an array";
+    std::string errMsg("");
+
+    LOGGER_HELPER(DEBUG, errMsg, "The resualt is an array");
+    //qDebug() << "The resualt is an array";
 
     uint32_t ind(0);
     QString item("Item %1: ");
 
     for (const auto& arrItem : arr)
     {
-        qDebug() << item.arg(ind) << arrItem;
+        //qDebug() << item.arg(ind) << arrItem;
+        LOGGER_HELPER(DEBUG, errMsg, item.arg(ind), arrItem);
+
         respMap += item.arg(ind) + ": \n";
         parseByType(arrItem, respMap);
         ind++;
@@ -284,20 +296,26 @@ void CServerManager::SCliWrap::parse(const QJsonArray& arr, QString& respMap)
 
 void CServerManager::SCliWrap::parse(const QJsonObject& obj, QString& respMap)
 {
-    qDebug() << "The resualt is an Object";
+    std::string errMsg("");
+    //qDebug() << "The resualt is an Object";
+    LOGGER_HELPER(DEBUG, errMsg, "The resualt is an Object");
 
     auto variantMap(obj.toVariantMap());
 
     for (auto mapIter = variantMap.begin(); mapIter != variantMap.end(); ++mapIter)
     {
-        qDebug() << "pushing item Key: " << mapIter.key() << "Val: " << mapIter.value();
+        //qDebug() << "pushing item Key: " << mapIter.key() << "Val: " << mapIter.value();
+        LOGGER_HELPER(DEBUG, errMsg, "pushing item Key: ", mapIter.key(), "Val: ", mapIter.value());
         respMap += mapIter.key() + " : " +  mapIter.value().toString() + "\n" + RESP_SEPERATOR;
     }
 }
 
 void CServerManager::SCliWrap::parse(const QJsonValue& val, QString& respMap)
 {
-    qDebug() << "The resuat is a regular value: " << val;
+    std::string errMsg("");
+    //qDebug() << "The resuat is a regular value: " << val;
+
+    LOGGER_HELPER(DEBUG, errMsg, "The resuat is a regular value: ", val);
 
     auto var = val.toVariant();
 

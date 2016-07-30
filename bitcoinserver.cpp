@@ -4,6 +4,7 @@
 
 BitcoinServer::BitcoinServer(QWidget *parent) :
     QMainWindow(parent),
+    CLogable("BitcoinLogger"),
     ui(new Ui::BitcoinServer),
     m_manager(CServerManager::getReference())
 {
@@ -17,7 +18,8 @@ BitcoinServer::~BitcoinServer()
 
 void BitcoinServer::on_pushButton_clicked()
 {
-    qDebug() << "GoodBye";
+    std::string errMsg("");
+    LOGGER_HELPER(INFO, errMsg, "Exiting Application");
     m_manager.deleteAll();
     exit(0);
 }

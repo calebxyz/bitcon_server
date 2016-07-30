@@ -9,6 +9,7 @@
 
 CCommands::CCommands(QWidget *parent) :
     QDialog(parent),
+    CLogable("CommandsLog"),
     ui(new Ui::CCommands)
 {
     ui->setupUi(this);
@@ -96,16 +97,19 @@ void CCommands::on_pushButton_3_clicked()
 bool CCommands::runCommand(const uint32_t ind, const QString& cmd, const QString& args, QString& reslt)
 {
     bool rv(true);
+    std::string errMsg("");
 
     QByteArray rawJason;
 
     CServerManager::TStringMap resp(m_serverMng.sendMsg(ind, cmd, args, &rawJason));
 
-    qDebug() << "raw Response: [ " << rawJason << " ]";
+    //qDebug() << "raw Response: [ " << rawJason << " ]";
+    LOGGER_HELPER(TRACE, errMsg, "Raw response from server: [ " , rawJason, " ]");
 
     auto res = (resp.begin());
 
-    qDebug() << res->first << ": [ " << res->second << " ]";
+    //qDebug() << res->first << ": [ " << res->second << " ]";
+    LOGGER_HELPER(TRACE, errMsg, res->first , ": [ ", res->second, " ]");
 
     if (res->first != "Response")
     {
