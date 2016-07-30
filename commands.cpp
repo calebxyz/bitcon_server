@@ -26,6 +26,7 @@ void CCommands::show()
 
     initCombo(ui->comboBox, data);
     initCombo(ui->comboBox_2, data);
+    initCombo(ui->comboBox_3, data);
 
     QDialog::show();
 }
@@ -56,7 +57,7 @@ void CCommands::on_comboBox_activated(int index)
 
 void CCommands::on_pushButton_clicked()
 {
-    auto ind(ui->comboBox->currentData().toInt());
+    auto ind(ui->comboBox_3->currentData().toInt());
 
     EXE_LAMBDA;
 
@@ -82,7 +83,7 @@ void CCommands::on_pushButton_2_clicked()
 
 void CCommands::on_pushButton_3_clicked()
 {
-    auto ind(ui->comboBox->currentData().toInt());
+    auto ind(ui->comboBox_3->currentData().toInt());
 
     EXE_LAMBDA;
 
@@ -128,7 +129,7 @@ bool CCommands::runCommand(const uint32_t ind, bool showResp, const QString& cmd
 
 void CCommands::on_pushButton_4_clicked()
 {
-    auto ind(ui->comboBox->currentData().toInt());
+    auto ind(ui->comboBox_3->currentData().toInt());
 
     EXE_LAMBDA;
 
@@ -156,7 +157,7 @@ void CCommands::on_pushButton_6_clicked()
 {
     static cargWindow argWin;
 
-    auto ind(ui->comboBox->currentData().toInt());
+    auto ind(ui->comboBox_3->currentData().toInt());
 
     QString cmd("generate");
 
@@ -217,7 +218,7 @@ void CCommands::on_pushButton_8_clicked()
 
 void CCommands::on_pushButton_9_clicked()
 {
-    auto ind(ui->comboBox->currentData().toInt());
+    auto ind(ui->comboBox_3->currentData().toInt());
 
     auto cmd("getinfo");
 
@@ -260,12 +261,12 @@ void CCommands::regAllServer()
 
     auto servers = getActiveServerList();
 
-    LOGGER_HELPER(TRACE, errMsg, "Registering servers: [ ", servers, " ]");
-
     for (auto regIter(servers.begin()); regIter != servers.end(); regIter++)
     {
         for (auto acceptIter(regIter+1); acceptIter != servers.end(); acceptIter++)
         {
+            LOGGER_HELPER(TRACE, errMsg, "Registering servers: [ ", *regIter, " ]" ,
+                          " and [ ", *acceptIter, " ]");
             addNode(*regIter, *acceptIter, false);
         }
     }
