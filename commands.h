@@ -16,6 +16,10 @@ class CCommands;
 
 class CCommands : public QDialog, CLogable
 {
+
+    //this is my friend
+    friend class CDemo;
+
     Q_OBJECT
 
 public:
@@ -30,6 +34,10 @@ public:
     //add all serveres to all nodes
     void regAllServer();
 
+    void createAddress(quint32 serv, bool showResp = true);
+
+    //create an address for all active servers
+    void createAddForAll();
 
 private slots:
     void on_comboBox_activated(int index);
@@ -56,6 +64,12 @@ private slots:
 
     void on_pushButton_11_clicked();
 
+    void on_pushButton_12_clicked();
+
+    void on_pushButton_13_clicked();
+
+    void on_pushButton_14_clicked();
+
 private:
 
     bool runCommand(const uint32_t ind, bool showResp, const QString& cmd, const QString& args, QString& reslt);
@@ -76,6 +90,14 @@ private:
 
         return rv;
     }
+
+    void executeHelper(QString cmd, QComboBox* box1, QComboBox* box2 = nullptr, bool showeReps = true, QString args = "");
+
+    void mine(qint32 ind, qint32 blocks);
+
+    double getBalance(qint32 ind, bool showResp = true);
+
+    void sendCoins(qint32 sendr, qint32 rcvr, quint32 amount, bool showResp = true);
 
     Ui::CCommands *ui;
 

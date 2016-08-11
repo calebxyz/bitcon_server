@@ -12,6 +12,8 @@ LIB4CXX_INC = /usr/include/log4cxx
 include($${JASON}/qjsonrpc.pri)
 include($${JASON}/tests/tests.pri)
 
+CONFIG += c++14
+
 QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -30,7 +32,8 @@ SOURCES += main.cpp \
     commands.cpp \
     showresp.cpp \
     argwindowmine.cpp \
-    logable.cpp
+    logable.cpp \
+    demo.cpp
         bitcoinserver.cpp
 
 HEADERS  += bitcoinserver.h\
@@ -43,7 +46,8 @@ HEADERS  += bitcoinserver.h\
     commands.h \
     showresp.h \
     argwindowmine.h \
-    logable.h
+    logable.h \
+    demo.h
 
 FORMS    += bitcoinserver.ui \
     settingswin.ui \
@@ -52,7 +56,8 @@ FORMS    += bitcoinserver.ui \
     show.ui \
     commands.ui \
     showresp.ui \
-    argwindowmine.ui
+    argwindowmine.ui \
+    demo.ui
 
 LIBS += -L $${HTTP_LIB}  -L $${LOG4CXX_LIB} -ljasonhttpclient -llog4cxx
 

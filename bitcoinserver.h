@@ -9,6 +9,7 @@
 #include "show.h"
 #include "commands.h"
 #include "logable.h"
+#include "demo.h"
 
 namespace Ui {
 class BitcoinServer;
@@ -35,6 +36,8 @@ private slots:
 
     void on_pushButton_6_clicked();
 
+    void on_pushButton_7_clicked();
+
 private:
     Ui::BitcoinServer *ui;
 
@@ -49,6 +52,8 @@ private:
     CShow m_show;
 
     CCommands m_commands;
+
+    CDemo m_demo;
 
 };
 

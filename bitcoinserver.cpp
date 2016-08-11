@@ -19,7 +19,10 @@ BitcoinServer::~BitcoinServer()
 void BitcoinServer::on_pushButton_clicked()
 {
     std::string errMsg("");
-    LOGGER_HELPER(INFO, errMsg, "Exiting Application");
+    LOGGER_HELPER(INFO, errMsg,
+                  std::string("==================================================================\n\t\t") +
+                  "Exiting Application \n" +
+                  "==================================================================");
     m_manager.deleteAll();
     exit(0);
 }
@@ -47,4 +50,9 @@ void BitcoinServer::on_pushButton_5_clicked()
 void BitcoinServer::on_pushButton_6_clicked()
 {
     m_commands.show();
+}
+
+void BitcoinServer::on_pushButton_7_clicked()
+{
+    m_demo.show();
 }

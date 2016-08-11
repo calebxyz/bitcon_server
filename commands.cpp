@@ -59,7 +59,8 @@ void CCommands::on_pushButton_clicked()
 {
     auto ind(ui->comboBox_3->currentData().toInt());
 
-    EXE_LAMBDA;
+    getBalance(ind);
+    /*EXE_LAMBDA;
 
     auto status = execute(ind, std::move(exe), false, true, QString("getbalance"), QString(""));
 
@@ -69,7 +70,7 @@ void CCommands::on_pushButton_clicked()
         m_serverMng.setBalance(ind, balance[0].toFloat());
     }
 
-    /*if (ind > -1)
+    if (ind > -1)
     {
         runCommand(ind, "getbalance", "");
     }*/
@@ -81,18 +82,23 @@ void CCommands::on_pushButton_2_clicked()
     hide();
 }
 
+void CCommands::createAddress(quint32 serv, bool showResp)
+{
+    EXE_LAMBDA;
+
+    auto status = execute(serv, std::move(exe), false, showResp, QString("getnewaddress"), QString(""));
+
+    if (status)
+    {
+        m_serverMng.setAddress(serv, reslt.split(CServerManager::RESP_SEPERATOR)[0]);
+    }
+}
+
 void CCommands::on_pushButton_3_clicked()
 {
     auto ind(ui->comboBox_3->currentData().toInt());
 
-    EXE_LAMBDA;
-
-    auto status = execute(ind, std::move(exe), false, true, QString("getnewaddress"), QString(""));
-
-    if (status)
-    {
-        m_serverMng.setAddress(ind, reslt.split(CServerManager::RESP_SEPERATOR)[0]);
-    }
+    createAddress(ind);
 }
 
 bool CCommands::runCommand(const uint32_t ind, bool showResp, const QString& cmd, const QString& args, QString& reslt)
@@ -129,16 +135,12 @@ bool CCommands::runCommand(const uint32_t ind, bool showResp, const QString& cmd
 
 void CCommands::on_pushButton_4_clicked()
 {
-    auto ind(ui->comboBox_3->currentData().toInt());
-
-    EXE_LAMBDA;
-
-    execute(ind, std::move(exe), false, true, QString("getpeerinfo"), QString(""));
+    executeHelper("getpeerinfo", ui->comboBox_3);
 }
 
 void CCommands::on_pushButton_5_clicked()
 {
-    auto ind(ui->comboBox->currentData().toInt());
+    //auto ind(ui->comboBox->currentData().toInt());
 
     QStringList commandAndArgs((ui->lineEdit->text()).split(" ")); //create List of command variants
 
@@ -148,9 +150,11 @@ void CCommands::on_pushButton_5_clicked()
 
     QString args = commandAndArgs.join(" ");
 
-    EXE_LAMBDA;
+    executeHelper(std::move(cmd), ui->comboBox_3, nullptr, true, std::move(args));
 
-    execute(ind, std::move(exe), false, true, cmd, args);
+    //EXE_LAMBDA;
+
+    //execute(ind, std::move(exe), false, true, cmd, args);
 }
 
 void CCommands::on_pushButton_6_clicked()
@@ -168,6 +172,22 @@ void CCommands::on_pushButton_6_clicked()
     });
 
     argWin.show(std::move(subExeFunc), "Number Of Blocks");
+}
+
+void CCommands::mine(qint32 ind, qint32 blocks)
+{
+    QString cmd("generate");
+
+    EXE_LAMBDA;
+
+    QString args;
+
+    QTextStream ts(&args);
+
+    ts << blocks;
+
+    execute(ind, std::move(exe), false, false, cmd, args);
+
 }
 
 void CCommands::on_pushButton_7_clicked()
@@ -218,24 +238,12 @@ void CCommands::on_pushButton_8_clicked()
 
 void CCommands::on_pushButton_9_clicked()
 {
-    auto ind(ui->comboBox_3->currentData().toInt());
-
-    auto cmd("getinfo");
-
-    EXE_LAMBDA;
-
-    execute(ind, std::move(exe), false, true, cmd, QString(""));
+    executeHelper("getinfo", ui->comboBox_3);
 }
 
 void CCommands::on_pushButton_10_clicked()
 {
-    auto ind(ui->comboBox_2->currentData().toInt());
-
-    auto cmd("getinfo");
-
-    EXE_LAMBDA;
-
-    execute(ind, std::move(exe), false, true, cmd, QString(""));
+    executeHelper("getblockchaininfo", ui->comboBox_3);
 }
 
 QVector<quint32> CCommands::getActiveServerList()
@@ -272,7 +280,73 @@ void CCommands::regAllServer()
     }
 }
 
+void CCommands::createAddForAll()
+{
+    std::string errMsg("");
+
+    auto servers = getActiveServerList();
+
+    for (auto serv : servers)
+    {
+        createAddress(serv, false);
+    }
+}
+
 void CCommands::on_pushButton_11_clicked()
 {
     regAllServer();
+}
+
+void CCommands::on_pushButton_12_clicked()
+{
+    executeHelper("listtransactions", ui->comboBox_3);
+}
+
+void CCommands::on_pushButton_13_clicked()
+{
+    executeHelper("dumpwallet", ui->comboBox_3, nullptr, true, QString("walletInfo.txt"));
+}
+
+
+void CCommands::executeHelper(QString cmd, QComboBox* box1, QComboBox* /*box2*/, bool showReps, QString args)
+{
+    auto ind1(box1->currentData().toInt());
+
+    EXE_LAMBDA;
+
+    execute(ind1, std::move(exe), false, showReps, cmd, args);
+}
+
+double CCommands::getBalance(qint32 ind, bool showResp)
+{
+    EXE_LAMBDA;
+
+    auto status = execute(ind, std::move(exe), false, showResp, QString("getbalance"), QString(""));
+
+    QStringList balance;
+
+    if (status)
+    {
+        balance = reslt.split(CServerManager::RESP_SEPERATOR);
+        m_serverMng.setBalance(ind, balance[0].toFloat());
+    }
+
+    return balance[0].toFloat();
+}
+
+void CCommands::sendCoins(qint32 sendr, qint32 rcvr, quint32 amount, bool showResp)
+{
+    QString cmd("sendtoaddress");
+
+    QString add(m_serverMng.getAddress(rcvr));
+    QString args = QString::number(amount);
+    add += " ";
+    EXE_LAMBDA;
+
+    execute(sendr, std::move(exe), false, showResp, cmd, add + args);
+}
+
+void CCommands::on_pushButton_14_clicked()
+{
+    createAddForAll();
 }
