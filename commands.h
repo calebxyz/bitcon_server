@@ -99,6 +99,9 @@ private:
 
     void sendCoins(qint32 sendr, qint32 rcvr, quint32 amount, bool showResp = true);
 
+    QStringList getMiningInfo(qint32 ind);
+
+
     Ui::CCommands *ui;
 
     CServerManager& m_serverMng = CServerManager::getReference();

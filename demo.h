@@ -16,6 +16,8 @@ class CDemo;
 struct SLoggingTask;
 }
 
+static const qint32 DONT_CARE(-1);
+
 //container calls for the logging operation we want it to have slots
 //so it will inharite the QObject
 struct SLoggingTask : public QObject
@@ -83,8 +85,11 @@ private:
 
         inline void add()
         {
+            std::string errMsg("");
             static constexpr quint32 ONE{1};
-            operCount.fetch_add(ONE);
+            auto num = operCount.fetch_add(ONE);
+
+             LOGGER_HELPER(INFO, errMsg, "performed: [", num, "] operations");
             //std::atomic_fetch_add(&operCount, &ONE);
         }
 
@@ -100,7 +105,7 @@ private:
             stopMe.test_and_set();
         }
 
-        void minerMain(qint32 a_miner, QVector<quint32> a_players, std::promise<void> p);
+        void minerMain(qint32 a_miner, QVector<quint32> a_players, std::promise<void>& p);
 
     private:
         std::atomic<quint32> operCount;
@@ -117,9 +122,11 @@ private:
 
         inline void setCount()
         {
+            std::string errMsg("");
             static const qint32 MAX_OPERS(100);
 
             currMaxOpers = std::rand() % MAX_OPERS;
+            LOGGER_HELPER(INFO, errMsg, "changed the number of operations needed for mining to: [", currMaxOpers, "]");
         }
 
     };
@@ -140,7 +147,7 @@ private:
             stopMe.test_and_set();
         }
 
-        void playerMain(TMinerSptr a_miner, QVector<quint32> a_players, std::future<void> f);
+        void playerMain(TMinerSptr a_miner, QVector<quint32> a_players, std::future<void>& f);
 
     private:
 
@@ -151,10 +158,23 @@ private:
 
         void init(TMinerSptr a_miner, QVector<quint32> a_players);
 
-        inline qint32 peekPlayer()
+        inline qint32 peekPlayer(qint32 currIndex)
         {
             auto player = (std::rand() % vectSize);
-            return player < vectSize ? player : player - 1;
+
+            if ((currIndex != DONT_CARE) && (currIndex == player))
+            {
+                if (player > 0)
+                {
+                    --player;
+                }
+                else
+                {
+                    ++player;
+                }
+            }
+
+            return player;
         }
 
     };
@@ -170,8 +190,8 @@ private:
     std::unique_ptr<std::thread> m_logReaderTask;
     QFile m_logFile;
     QTextStream m_stream;
-
-
+    std::promise<void> m_minerPromise;
+    std::future<void> m_playersFeture;
 };
 
 #endif // DEMO_H

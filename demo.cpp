@@ -83,8 +83,7 @@ void CDemo::on_pushButton_2_clicked()
         servers.pop_front(); //remove the miner
 
         //create the sync point
-        std::promise<void> p;
-        auto f = p.get_future();
+        m_playersFeture = m_minerPromise.get_future();
 
         //first step is to register all servers
         g_commands->regAllServer();
@@ -94,15 +93,15 @@ void CDemo::on_pushButton_2_clicked()
 
         //creating the demo taks
         m_minerTask = std::make_unique<std::thread>
-        (std::thread([this, miner, servers, &p]()
+        (std::thread([this, miner, servers]()
         {
-            (this->m_miner)->minerMain(miner, std::move(servers), std::move(p));
+            (this->m_miner)->minerMain(miner, std::move(servers), this->m_minerPromise);
         }));
 
         m_playerTask = std::make_unique<std::thread>
-        (std::thread([this, servers, &f]()
+        (std::thread([this, servers]()
         {
-            (this->m_player)->playerMain(this->m_miner, std::move(servers), std::move(f));
+            (this->m_player)->playerMain(this->m_miner, std::move(servers), this->m_playersFeture);
         }));
 
         m_minerTask->detach();
@@ -134,7 +133,7 @@ void CDemo::SMiner::distCash()
         //exit loop if no more bitcoins left.
         if (balance <= 0)
         {
-            return;
+            break;
         }
     }
 }
@@ -157,9 +156,12 @@ void CDemo::SMiner::init(qint32 a_miner, QVector<quint32> a_players)
 
     //distrebute cash between active players
     distCash();
+
+    //now we have to mine 6 more block so that the distrebution will work
+    g_commands->mine(miner, 6);
 }
 
-void CDemo::SMiner::minerMain(qint32 a_miner, QVector<quint32> a_players, std::promise<void> p)
+void CDemo::SMiner::minerMain(qint32 a_miner, QVector<quint32> a_players, std::promise<void>& p)
 {
     const auto SLEEP_TIME(2s);
     const auto MAX_MININGS(6);
@@ -186,6 +188,12 @@ void CDemo::SMiner::minerMain(qint32 a_miner, QVector<quint32> a_players, std::p
 
             if (minings == MAX_MININGS)
             {
+                //get current mining information
+                auto miningInfo = g_commands->getMiningInfo(miner);
+
+                LOGGER_HELPER(INFO, errMsg, "Current mining info: [ ", miningInfo, " ]");
+
+                //distrebute earnings between the players
                 distCash();
             }
         }
@@ -212,11 +220,14 @@ void CDemo::SPlayer::init(CDemo::TMinerSptr a_miner, QVector<quint32> a_players)
 
 }
 
-void CDemo::SPlayer::playerMain(TMinerSptr a_miner, QVector<quint32> a_players, std::future<void> f)
+void CDemo::SPlayer::playerMain(TMinerSptr a_miner, QVector<quint32> a_players, std::future<void>& f)
 {
 
     const auto SLEEP_TIME(1s);
     std::string errMsg("");
+    qint32 playerSndr{DONT_CARE};
+    qint32 playerRcvr{DONT_CARE};
+
     init(std::move(a_miner), std::move(a_players));
 
     LOGGER_HELPER(INFO, errMsg, "Players init proccess ok waiting for miner");
@@ -226,8 +237,8 @@ void CDemo::SPlayer::playerMain(TMinerSptr a_miner, QVector<quint32> a_players, 
     //while flase
     while (!stopMe.test_and_set())
     {
-        auto playerSndr = peekPlayer();
-        auto playerRcvr = peekPlayer();
+        playerSndr = peekPlayer(playerSndr);
+        playerRcvr = peekPlayer(playerSndr);
 
         auto balance = g_commands->getBalance(playerSndr, false);
 
@@ -238,7 +249,7 @@ void CDemo::SPlayer::playerMain(TMinerSptr a_miner, QVector<quint32> a_players, 
 
             balance -= amount;
 
-            LOGGER_HELPER(INFO, errMsg, QString("Sending [ "), amount, " ] coins  from [ ", playerSndr, "] to server [ ",
+            LOGGER_HELPER(INFO, errMsg, QString("Sending [ "), amount, " ] coins  from server [ ", playerSndr, "] to server [ ",
                           playerRcvr , " ]");
             LOGGER_HELPER(INFO, errMsg, QString("Amount left"), balance, " ]");
 
@@ -308,8 +319,9 @@ void CDemo::drawLogger(QString str)
 {
     static auto pTextEdit = ui->textEdit;
 
+    pTextEdit->insertPlainText("\n");
     pTextEdit->insertPlainText(str);
     auto cursor = pTextEdit->textCursor();
-    cursor.setPosition(QTextCursor::End);
+    cursor.setPosition(QTextCursor::Start);
     pTextEdit->setTextCursor(cursor);
 }

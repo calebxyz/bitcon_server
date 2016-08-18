@@ -350,3 +350,27 @@ void CCommands::on_pushButton_14_clicked()
 {
     createAddForAll();
 }
+
+QStringList CCommands::getMiningInfo(qint32 ind)
+{
+    QStringList rv;
+    QString cmd{"getmininginfo"};
+    auto args{QString("")};
+
+    //we want to have an empty string list as a referance
+    rv.clear();
+
+    EXE_LAMBDA;
+
+    auto res =  execute(ind, std::move(exe), false, false, cmd, args);
+
+    if  (res)
+    {
+        rv = std::move(reslt.split(CServerManager::RESP_SEPERATOR));
+    }
+
+    return rv;
+}
+
+
+
