@@ -161,10 +161,26 @@ void CDemo::SMiner::init(qint32 a_miner, QVector<quint32> a_players)
     g_commands->mine(miner, 6);
 }
 
+void CDemo::SMiner::printBalanceOfAllPlayers()
+{
+    std::string errMsg("");
+    auto balance = g_commands->getBalance(miner, false);
+
+    LOGGER_HELPER(INFO, errMsg, QString("The balance of the Miner is ["), balance , "]");
+
+    for (auto ind : players)
+    {
+        balance = g_commands->getBalance(ind, false);
+
+        LOGGER_HELPER(INFO, errMsg, QString("The balance of the player ["), ind, "] is [", balance , "]");
+    }
+}
+
 void CDemo::SMiner::minerMain(qint32 a_miner, QVector<quint32> a_players, std::promise<void>& p)
 {
     const auto SLEEP_TIME(2s);
     const auto MAX_MININGS(6);
+    static bool firstTime{true};
 
     qint32 minings(1);
     std::string errMsg("");
@@ -190,12 +206,19 @@ void CDemo::SMiner::minerMain(qint32 a_miner, QVector<quint32> a_players, std::p
             {
                 //get current mining information
                 auto miningInfo = g_commands->getMiningInfo(miner);
+                minings = 0;
 
                 LOGGER_HELPER(INFO, errMsg, "Current mining info: [ ", miningInfo, " ]");
 
-                //distrebute earnings between the players
-                distCash();
+                if (firstTime)
+                {
+                    //distrebute earnings between the players
+                    //distCash();
+                    firstTime = false;
+                }
             }
+
+            printBalanceOfAllPlayers();
         }
         else
         {
@@ -223,7 +246,7 @@ void CDemo::SPlayer::init(CDemo::TMinerSptr a_miner, QVector<quint32> a_players)
 void CDemo::SPlayer::playerMain(TMinerSptr a_miner, QVector<quint32> a_players, std::future<void>& f)
 {
 
-    const auto SLEEP_TIME(1s);
+    const auto SLEEP_TIME(500ms);
     std::string errMsg("");
     qint32 playerSndr{DONT_CARE};
     qint32 playerRcvr{DONT_CARE};
@@ -237,25 +260,37 @@ void CDemo::SPlayer::playerMain(TMinerSptr a_miner, QVector<quint32> a_players, 
     //while flase
     while (!stopMe.test_and_set())
     {
-        playerSndr = peekPlayer(playerSndr);
-        playerRcvr = peekPlayer(playerSndr);
+        std::array<qint32, 2> peeked = {DONT_CARE, DONT_CARE};
+        peeked[0] = peekPlayer(peeked.front());
+        peeked[1] = peekPlayer(peeked.front());
+
+        static constexpr quint32 PEEKED_SIZE{peeked.size()-1};
+        static CUnfiformRandomInt playerPeeker(0, PEEKED_SIZE);
+        auto sndrInd = playerPeeker.getNumber();
+
+        playerSndr = players[peeked[sndrInd]];
+        playerRcvr = players[peeked[PEEKED_SIZE - sndrInd]];  // if player sndr was 0 player rcvr will be 1 else 0
+
 
         auto balance = g_commands->getBalance(playerSndr, false);
+        auto balanceRec =  g_commands->getBalance(playerRcvr, false);
+        LOGGER_HELPER(INFO, errMsg, QString("peeked player ["), playerSndr , "] with balance of [", balance, "] ",
+                      "as sender and player [", playerRcvr, "] with balance of [", balanceRec, "] as the reciver");
+
 
         //only if this player has cash
         if (balance > 0.0009)
         {
             auto amount = CDemo::getAmount(balance);
 
-            balance -= amount;
-
-            LOGGER_HELPER(INFO, errMsg, QString("Sending [ "), amount, " ] coins  from server [ ", playerSndr, "] to server [ ",
-                          playerRcvr , " ]");
-            LOGGER_HELPER(INFO, errMsg, QString("Amount left"), balance, " ]");
-
             g_commands->sendCoins(playerSndr, playerRcvr, amount, false);
 
             miner->add();
+
+            balance = g_commands->getBalance(playerSndr, false); // get the new balance of the sender
+
+            LOGGER_HELPER(INFO, errMsg, QString("Sending [ "), amount, " ] coins  from server [ ", playerSndr, "] to server [ ",
+                          playerRcvr , " ] ", QString("Amount left ["), balance, " ]");
         }
 
         stopMe.clear();
@@ -271,23 +306,6 @@ void CDemo::on_pushButton_3_clicked()
     m_logReader->stop();
 }
 
-qreal CDemo::getAmount(qreal& currBalance)
-{
-    auto half = static_cast<qint32>(currBalance / 2);
-
-    qreal stoshi = (currBalance - static_cast<qint32>(currBalance)) / 2;
-
-    auto intAmount = std::rand() % static_cast<qint32>(currBalance);
-
-    qreal amount = static_cast<qreal>(intAmount) + stoshi;
-
-    if (amount >= half)
-    {
-        amount /= 2; // give only half of what you wanted to give
-    }
-
-    return amount;
-}
 
 void SLoggingTask::mainFunc(QTextStream& stream)
 {

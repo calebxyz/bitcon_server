@@ -5,6 +5,9 @@
 #include <QJsonDocument>
 #include <QBuffer>
 #include <string>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 
 #define CLI_WRAPPER CServerManager::SCliWrap;
 
@@ -15,7 +18,7 @@ using TDockCmdLine = char[255];
 constexpr TDockCmdLine DOCKER_NAME{"DockerServer%1"};
 constexpr TDockCmdLine DOCKER_IMG{"bitcoin-regtest"};
 constexpr TDockCmdLine DOCKER_LOCK{"/home/alexd/gak/docker-bitcoin-regtest/bitcoin-regtest"};
-constexpr TDockCmdLine DOCKER_CMD{"run -t -p %1:8888 -p %4:18444 -p %5:18332 --name=%2 --hostname=%3"};
+constexpr TDockCmdLine DOCKER_CMD{"run -t -p %1:8888 -p %4:18444 -p %5:18332 --name=%2 --hostname=%3 -v /home/alexd/BitcoinServerManager/bitcoinLV/%2:/root/.bitcoin"};
 constexpr TDockCmdLine DOCKER_RM{"rm -f %1"};
 constexpr TDockCmdLine RUN_DEMON{"bitcoind -regtest -server -rpcuser=test -rpcpassword=test -rpcallowip=0.0.0.0/0 -rpcport=8888 -printtoconsole"};
 constexpr TDockCmdLine DOCKER_BUILD{"build -t %1 %2"};
@@ -34,7 +37,7 @@ const char* CServerManager::STATUS = "5_Status";
 const char* CServerManager::BASE_IP = "172.17.0.%1"; //BASE IP OF THE DOCKER SERVERS
 const char* CServerManager::INVALID_IP = "BAD_IP_ADDR";
 
-const uint32_t CServerManager::BASE_IP_STATION = 2;
+const uint32_t CServerManager::BASE_IP_STATION = 3;
 
 //static definitions
 unsigned int CServerManager::s_id = 0;
@@ -161,6 +164,10 @@ CServerManager::SCliWrap::SCliWrap(unsigned int id, unsigned int port) : CLogabl
     m_dockCmd = std::move(QString(DOCKER_CMD).arg(QString(std::to_string(port).c_str())).arg(m_dockName).arg(m_dockName).arg(BASE_PORT1 + id).arg(BASE_PORT2 + id));
     m_endPoint = std::move(QString("http://172.17.0.1:%1").arg(std::to_string(port).c_str()));
     m_cli.reset(new CJasonHttpClient(m_endPoint));
+
+    std::string dirName = std::string("bitcoinLV/") + m_dockName.toStdString();
+
+    mkdir(dirName.c_str(), ACCESSPERMS);
 }
 
 
@@ -232,6 +239,8 @@ void CServerManager::SCliWrap::runDockerCmd(const QString& args)
 
     LOGGER_HELPER(DEBUG, errMsg, std::string("Running command: ") + DOCKER + "args:" + args.toStdString());
     //qDebug() << "Running command: " << DOCKER << "args:" + args;
+
+
 
     proc.start(DOCKER, std::move(arguments));
 

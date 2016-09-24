@@ -238,7 +238,7 @@ selection-background-color: rgb(239, 81, 15);</string>
   <widget class="QPushButton" name="pushButton_11">
    <property name="geometry">
     <rect>
-     <x>290</x>
+     <x>80</x>
      <y>530</y>
      <width>131</width>
      <height>27</height>
@@ -254,9 +254,9 @@ selection-background-color: rgb(239, 81, 15);</string>
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>210</x>
      <y>490</y>
-     <width>181</width>
+     <width>211</width>
      <height>20</height>
     </rect>
    </property>
@@ -267,9 +267,9 @@ selection-background-color: rgb(239, 81, 15);</string>
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>200</x>
      <y>300</y>
-     <width>171</width>
+     <width>241</width>
      <height>20</height>
     </rect>
    </property>
@@ -280,9 +280,9 @@ selection-background-color: rgb(239, 81, 15);</string>
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>200</x>
      <y>10</y>
-     <width>181</width>
+     <width>221</width>
      <height>20</height>
     </rect>
    </property>
@@ -408,7 +408,7 @@ selection-background-color: rgb(239, 81, 15);</string>
   <widget class="QPushButton" name="pushButton_14">
    <property name="geometry">
     <rect>
-     <x>440</x>
+     <x>240</x>
      <y>530</y>
      <width>131</width>
      <height>27</height>
@@ -419,6 +419,22 @@ selection-background-color: rgb(239, 81, 15);</string>
    </property>
    <property name="text">
     <string>Create Accounts</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_15">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>530</y>
+     <width>141</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(204, 236, 242);</string>
+   </property>
+   <property name="text">
+    <string>Load Last Seassion</string>
    </property>
   </widget>
  </widget>

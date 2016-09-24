@@ -70,6 +70,8 @@ private slots:
 
     void on_pushButton_14_clicked();
 
+    void on_pushButton_15_clicked();
+
 private:
 
     bool runCommand(const uint32_t ind, bool showResp, const QString& cmd, const QString& args, QString& reslt);
@@ -101,6 +103,7 @@ private:
 
     QStringList getMiningInfo(qint32 ind);
 
+    void addNode(quint32 sndrId, QString& sndrIp, QString& rcvrIp, bool showResp = true);
 
     Ui::CCommands *ui;
 

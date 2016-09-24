@@ -10,6 +10,7 @@
 #include <thread>
 #include <QFile>
 #include <QTextStream>
+#include <random>
 
 namespace Ui {
 class CDemo;
@@ -17,6 +18,70 @@ struct SLoggingTask;
 }
 
 static const qint32 DONT_CARE(-1);
+
+//uniformity random class .
+class CUnfiformRandomReal
+{
+public:
+
+    CUnfiformRandomReal():
+        m_mt(m_rd()),
+        m_uniforDist(std::make_unique<std::uniform_real_distribution<qreal> >(0, 0))
+    {}
+
+    CUnfiformRandomReal(const qreal& lowLim, const qreal& upLim):
+        m_mt(m_rd()),
+        m_uniforDist(std::make_unique<std::uniform_real_distribution<qreal> >(lowLim, upLim))
+    {}
+
+    inline void setNewLimits(const qreal& lowLim, const qreal& upLim)
+    {
+        m_uniforDist = std::make_unique<std::uniform_real_distribution<qreal> >(lowLim, upLim);
+    }
+
+    inline qreal getNumber()
+    {
+        return (*(m_uniforDist.get()))(m_mt);
+    }
+
+private:
+    std::random_device m_rd;
+    std::mt19937 m_mt;
+    std::unique_ptr<std::uniform_real_distribution<qreal> > m_uniforDist;
+
+};
+
+//uniformity random class .
+class CUnfiformRandomInt
+{
+public:
+
+    CUnfiformRandomInt():
+        m_mt(m_rd()),
+        m_uniforDist(std::make_unique<std::uniform_int_distribution<quint32> >(0, 0))
+    {}
+
+    CUnfiformRandomInt(const quint32& lowLim, const quint32& upLim):
+        m_mt(m_rd()),
+        m_uniforDist(std::make_unique<std::uniform_int_distribution<quint32> >(lowLim, upLim))
+    {}
+
+    inline void setNewLimits(const quint32& lowLim, const quint32& upLim)
+    {
+        m_uniforDist = std::make_unique<std::uniform_int_distribution<quint32> >(lowLim, upLim);
+    }
+
+    inline quint32 getNumber()
+    {
+        return (*(m_uniforDist.get()))(m_mt);
+    }
+
+private:
+    std::random_device m_rd;
+    std::mt19937 m_mt;
+    std::unique_ptr<std::uniform_int_distribution<quint32> > m_uniforDist;
+
+};
 
 //container calls for the logging operation we want it to have slots
 //so it will inharite the QObject
@@ -60,7 +125,11 @@ public:
     void show();
     ~CDemo();
 
-    static qreal getAmount(qreal& currBalance);
+    static qreal getAmount(qreal& currBalance)
+    {
+        CUnfiformRandomReal rd(0, currBalance);
+        return rd.getNumber();
+    }
 
 public slots:
     void drawLogger(QString str);
@@ -107,6 +176,8 @@ private:
 
         void minerMain(qint32 a_miner, QVector<quint32> a_players, std::promise<void>& p);
 
+        void printBalanceOfAllPlayers();
+
     private:
         std::atomic<quint32> operCount;
         std::atomic_flag stopMe = ATOMIC_FLAG_INIT;
@@ -114,6 +185,7 @@ private:
         QVector<quint32> players;
         quint32 currMaxOpers;
         std::mutex mut;
+        CUnfiformRandomReal m_realRD;
 
 
         void distCash();
@@ -123,9 +195,11 @@ private:
         inline void setCount()
         {
             std::string errMsg("");
-            static const qint32 MAX_OPERS(100);
+            static const qint32 MAX_OPERS(50);
 
-            currMaxOpers = std::rand() % MAX_OPERS;
+            static CUnfiformRandomInt countGenerator(0, MAX_OPERS);
+
+            currMaxOpers = countGenerator.getNumber();
             LOGGER_HELPER(INFO, errMsg, "changed the number of operations needed for mining to: [", currMaxOpers, "]");
         }
 
@@ -160,7 +234,9 @@ private:
 
         inline qint32 peekPlayer(qint32 currIndex)
         {
-            auto player = (std::rand() % vectSize);
+            static const qint32 PLAYER_SIZE{players.size() - 1};
+            static CUnfiformRandomInt playerPeeker(0, PLAYER_SIZE);
+            qint32 player = playerPeeker.getNumber();
 
             if ((currIndex != DONT_CARE) && (currIndex == player))
             {

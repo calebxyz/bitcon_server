@@ -218,6 +218,12 @@ void CCommands::addNode(quint32 sndrId, quint32 rcvrId, bool showResp)
 {
     auto sndrIp(m_serverMng.getIp(sndrId));
     auto rcvrIp(m_serverMng.getIp(rcvrId));
+
+    addNode(sndrId ,sndrIp, rcvrIp, showResp);
+}
+
+void CCommands::addNode(quint32 sndrId, QString& sndrIp, QString& rcvrIp, bool showResp)
+{
     auto cmd("addnode");
 
     if (sndrIp != CServerManager::INVALID_IP && rcvrIp != CServerManager::INVALID_IP)
@@ -373,4 +379,17 @@ QStringList CCommands::getMiningInfo(qint32 ind)
 }
 
 
+void CCommands::on_pushButton_15_clicked()
+{
+    std::string errMsg("");
+    QString MASTER_IP("172.17.0.2");
 
+    auto servers = getActiveServerList();
+
+    for (auto serv : servers)
+    {
+        auto sndrIp(m_serverMng.getIp(serv));
+
+        addNode(serv, sndrIp, MASTER_IP, false);
+    }
+}

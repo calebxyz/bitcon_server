@@ -39,6 +39,9 @@ private slots:
     void on_pushButton_7_clicked();
 
 private:
+
+    bool mountVolume();
+
     Ui::BitcoinServer *ui;
 
     CServerManager& m_manager;
